@@ -2,8 +2,9 @@ import java.util.*;
 
 /**
  * Graph representation of a Sudoku puzzle.
+ * CITATION:
  * Based on the paper: "Comparison Analysis of Breadth First Search and Depth Limited Search Algorithms in Sudoku Game"
- * by Ade Chandra Nugraha, Asep Id Hadiana, and Deden Witarsyah (2022)
+ * by Lina, Tirsa & Rumetna, Matheus. (2021).
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
  */
 public class SudokuGraph {
