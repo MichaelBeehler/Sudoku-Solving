@@ -9,7 +9,9 @@
  * by Lina, Tirsa & Rumetna, Matheus. (2021).
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
 ****************************/
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +21,11 @@ import java.util.Scanner;
 public class SudokuMain {
     
     public static void main(String[] args) {
+
+        List <int[][]> sudokuBoards = readSudokuFile("puzzles.txt");
+
         
-        // Try to read puzzles from puzzles.txt
-        try {
-            File puzzlesFile = new File("puzzles.txt");
-            Scanner puzzleScanner = new Scanner(puzzlesFile);
 
-        }
-        catch (Exception e) {
-            System.out.println(e);
-
-        }
         try {
             // Read puzzles from file
             List<int[][]> puzzles = SudokuFileReader.readPuzzles(puzzleFile);
@@ -115,7 +111,48 @@ public class SudokuMain {
     }
 
     // Given in
-    private static void generateGrid () {
+    private static List<int[][]> readSudokuFile(String fileName) {
+        List <int[][]> sudokuBoards = new ArrayList<>();
+
+        try (BufferedReader sudokBufferedReader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            
+            // Traverse the file
+            while ((line = sudokBufferedReader.readLine()) != null) {
+                line = line.trim();
+                int lineLength = line.length();
+                if (lineLength != 9) {
+                    continue;
+                }
+
+                int [][] sudokuBoard = new int [lineLength][lineLength];
+
+                int currRow = 0;
+
+                do {
+                    for (int currCol = 0; currCol < lineLength; currCol ++) {
+                        sudokuBoard[currRow][currCol] = Character.getNumericValue(line.charAt(currCol));
+                    }
+                    currRow ++;
+                    
+                    if (currRow < 9) {
+                        line = sudokBufferedReader.readLine();
+                        if (line == null || line.length() != 9) {
+                            break;
+                        }
+                    }
+                } while (currRow < 9);
+
+                if (currRow == 9) {
+                    sudokuBoards.add(sudokuBoard);
+                }
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return sudokuBoards;
 
     }
     
