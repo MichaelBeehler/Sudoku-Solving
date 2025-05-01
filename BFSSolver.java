@@ -1,5 +1,3 @@
-package Program3;
-
 import java.util.*;
 
 /**

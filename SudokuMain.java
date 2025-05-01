@@ -1,18 +1,35 @@
-package Program3;
+/****************************
+ * Program 3 - Sudoku Solving
+ * Program By: Michael Beehler, Brian Quintero
+ * Date Last Edited: May 1st, 2025
+ * Description: Solve Sudoku games of varying difficulty using BFS and DLS
+
+ * CITATION:
+ * Based on the paper: "Comparison Analysis of Breadth First Search and Depth Limited Search Algorithms in Sudoku Game"
+ * by Lina, Tirsa & Rumetna, Matheus. (2021).
+ * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
+****************************/
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class SudokuMain {
     
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.out.println("Usage: java SudokuMain <puzzle_file>");
-            return;
+        
+        // Try to read puzzles from puzzles.txt
+        try {
+            File puzzlesFile = new File("puzzles.txt");
+            Scanner puzzleScanner = new Scanner(puzzlesFile);
+
         }
-        
-        String puzzleFile = args[0];
-        
+        catch (Exception e) {
+            System.out.println(e);
+
+        }
         try {
             // Read puzzles from file
             List<int[][]> puzzles = SudokuFileReader.readPuzzles(puzzleFile);
@@ -95,6 +112,11 @@ public class SudokuMain {
         } catch (IOException e) {
             System.err.println("Error reading puzzle file: " + e.getMessage());
         }
+    }
+
+    // Given in
+    private static void generateGrid () {
+
     }
     
     /**
