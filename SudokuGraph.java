@@ -69,7 +69,7 @@ public class SudokuGraph {
     /**
      * Gets a copy of the current grid.
      */
-    public int[][] getGrid() {
+    public int[][] copyGrid() {
         int[][] copy = new int[size][size];
         for (int i = 0; i < size; i++) {
             System.arraycopy(grid[i], 0, copy[i], 0, size);
@@ -141,6 +141,30 @@ public class SudokuGraph {
             }
         }
         
+        return true;
+    }
+
+    // Given a row and column, return the values that can be placed in that location
+    public List<Integer> validValueList (int row, int col) {
+        List<Integer> validValues = new ArrayList<>();
+
+        for (int i = 1; i <= size; i++) {
+            if (isValid(row, col, i)) {
+                validValues.add(i);
+            }
+        }
+
+        return validValues;
+    }
+
+    public boolean isPuzzleSolved () {
+        for (int row[] : grid) {
+            for (int col : row) {
+                if (col == 0) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
     

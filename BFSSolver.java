@@ -8,13 +8,10 @@ import java.util.*;
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
  */
 public class BFSSolver {
-    private final List<int[][]> solutions;
-    private int steps;
+    // We will store solutions in a Hash Set.
+    // This is very useful in order to ensure that we are not inserting any duplicate solutions
+    private Set<String> previousSolutions = new HashSet<>();
     
-    public BFSSolver() {
-        this.solutions = new ArrayList<>();
-        this.steps = 0;
-    }
     
     /**
      * Solves the Sudoku puzzle using BFS.
@@ -22,66 +19,66 @@ public class BFSSolver {
      * @param maxSolutions Maximum number of solutions to find (0 for all)
      * @return true if at least one solution was found
      */
-    public boolean solve(int[][] initialGrid, int maxSolutions) {
-        solutions.clear();
-        steps = 0;
+    public boolean solve(SudokuGraph initialGraph) {
+        previousSolutions.clear();
         
-        int size = initialGrid.length;
-        Queue<int[][]> queue = new LinkedList<>();
-        queue.add(copyGrid(initialGrid, size));
+        Queue<SudokuGraph> queue = new LinkedList<>();
+        queue.add(initialGraph);
         
-        while (!queue.isEmpty() && (maxSolutions == 0 || solutions.size() < maxSolutions)) {
-            int[][] currentGrid = queue.poll();
-            steps++;
-            
-            // Create a temporary graph with the current grid
-            SudokuGraph tempGraph = new SudokuGraph(currentGrid);
-            int[] emptyCell = tempGraph.findEmptyCell();
-            
-            if (emptyCell == null) {
-                // No empty cells, we found a solution
-                solutions.add(currentGrid);
-                continue;
-            }
-            
-            int row = emptyCell[0];
-            int col = emptyCell[1];
-            
-            // Try each possible value for the empty cell
-            for (int value = 1; value <= size; value++) {
-                if (tempGraph.isValid(row, col, value)) {
-                    int[][] newGrid = copyGrid(currentGrid, size);
-                    newGrid[row][col] = value;
-                    queue.add(newGrid);
+        while (!queue.isEmpty()) {
+            SudokuGraph currGraph = queue.poll();
+
+            if (currGraph.isPuzzleSolved()) {
+                String solvedAsStr = convertToString(currGraph);
+                if (!previousSolutions.contains(solvedAsStr)) {
+                    previousSolutions.add(solvedAsStr);
                 }
+            
+            }
+
+            boolean visited = false; 
+            for (int currRow = 0; currRow < currGraph.getSize(); currRow ++) {
+                for (int currCol = 0; currCol < currGraph.getSize(); currCol ++) {
+                    if (currGraph.getValue(currRow, currCol) == 0) {
+                        List <Integer> validValuesList = currGraph.validValueList(currRow, currCol);
+
+                        for (int validValue : validValuesList) {
+                            int [][] newGrid = currGraph.copyGrid();
+                            newGrid[currRow][currCol] = validValue;
+                            SudokuGraph newGraph = new SudokuGraph(newGrid);
+                            queue.add(newGraph);
+
+                        }
+                        visited = true;
+                        break;
+                    } 
+                }
+                if (visited) {
+                    break;
+                }
+
             }
         }
-        
-        return !solutions.isEmpty();
-    }
-    
-    /**
-     * Creates a deep copy of a grid.
-     */
-    private int[][] copyGrid(int[][] grid, int size) {
-        int[][] copy = new int[size][size];
-        for (int i = 0; i < size; i++) {
-            System.arraycopy(grid[i], 0, copy[i], 0, size);
-        }
-        return copy;
+        return !previousSolutions.isEmpty();
     }
     
     /**
      * Gets the solutions found by BFS.
      */
-    public List<int[][]> getSolutions() {
-        return solutions;
+    public Set<String> getSolutions() {
+        return previousSolutions;
     }
     
-    /**
-     * Gets the number of steps taken by BFS.
-     */
-    public int getSteps() {
-        return steps;
+    private String convertToString (SudokuGraph graph) {
+        StringBuilder s = new StringBuilder();
+
+        int [][] grid = graph.copyGrid();
+
+        for (int[] row : grid) {
+            for (int col : row) {
+                s.append(col);
+            }
+        }
+        return s.toString();
     }
 }

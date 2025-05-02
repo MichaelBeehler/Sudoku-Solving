@@ -23,55 +23,47 @@ public class DLSSolver {
      * @param maxSolutions Maximum number of solutions to find (0 for all)
      * @return true if at least one solution was found
      */
-    public boolean solve(int[][] initialGrid, int maxDepth, int maxSolutions) {
-        solutions.clear();
-        steps = 0;
-        
-        dls(initialGrid, 0, maxDepth, maxSolutions);
-        
+    public boolean solve(SudokuGraph initialGraph, int maxDepth) {
+        boolean searchResult = dls(initialGraph.copyGrid(), maxDepth);
+        System.out.println("Number of DLS solutions found: " + solutions.size());
         return !solutions.isEmpty();
     }
     
     /**
      * Recursive helper for DLS.
      */
-    private boolean dls(int[][] currentGrid, int depth, int maxDepth, int maxSolutions) {
-        steps++;
+    private boolean dls(int[][] currentGrid, int maxDepth) {
         
-        if (depth > maxDepth) {
+        if (maxDepth == 0) {
             return false;
         }
         
-        SudokuGraph tempGraph = new SudokuGraph(currentGrid);
-        int[] emptyCell = tempGraph.findEmptyCell();
+        SudokuGraph sudokuGraph = new SudokuGraph(currentGrid);
         
-        if (emptyCell == null) {
-            // No empty cells, we found a solution
-            solutions.add(copyGrid(currentGrid, tempGraph.getSize()));
-            return maxSolutions == 0 || solutions.size() < maxSolutions;
+        if (sudokuGraph.isPuzzleSolved()) {
+            solutions.add(currentGrid);
+            return true;
         }
-        
-        int row = emptyCell[0];
-        int col = emptyCell[1];
-        int size = tempGraph.getSize();
-        
-        // Try each possible value for the empty cell
-        for (int value = 1; value <= size; value++) {
-            if (tempGraph.isValid(row, col, value)) {
-                int[][] newGrid = copyGrid(currentGrid, size);
-                newGrid[row][col] = value;
-                
-                if (!dls(newGrid, depth + 1, maxDepth, maxSolutions)) {
-                    return false;
-                }
-                
-                if (maxSolutions > 0 && solutions.size() >= maxSolutions) {
+
+        // Do a DLS
+        for (int currRow = 0; currRow < currentGrid.length; currRow ++) {
+            for (int currCol = 0; currCol < currentGrid[currRow].length; currCol ++) {
+                if (currentGrid [currRow][currCol] == 0) {
+                    List <Integer> values = sudokuGraph.validValueList(currRow, currCol);
+
+                    for (int possibleValue : values) {
+                        currentGrid [currRow][currCol] = possibleValue;
+
+                        if (dls(currentGrid, maxDepth - 1)) {
+                            return true;
+                        }
+                        currentGrid[currRow][currCol] = 0;
+                    }
                     return false;
                 }
             }
         }
-        
-        return true;
+        return false;
     }
     
     /**

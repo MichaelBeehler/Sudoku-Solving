@@ -30,55 +30,58 @@ public class SudokuMain {
                 System.out.println(Arrays.toString(row));
             }
             System.out.println();
-            
-            // Solve using BFS
-            System.out.println("\nSolving with BFS...");
-            BFSSolver bfsSolver = new BFSSolver();
-            long bfsStartTime = System.currentTimeMillis();
-            boolean bfsSolved = bfsSolver.solve(sudokuBoards.get(i), 5); // Find up to 5 solutions
-            long bfsEndTime = System.currentTimeMillis();
-                            
-            if (bfsSolved) {
-                System.out.println("BFS found " + bfsSolver.getSolutions().size() + " solution(s) in " + 
-                                    bfsSolver.getSteps() + " steps and " + (bfsEndTime - bfsStartTime) + "ms");
-                System.out.println("First solution:");
-                printGrid(bfsSolver.getSolutions().get(0));
-            } else {
-                System.out.println("BFS could not solve the puzzle.");
-            }
 
             // Solve using DLS
             System.out.println("\nSolving with DLS...");
+            SudokuGraph dlSudokuGraph = new SudokuGraph(sudokuBoards.get(i));
             DLSSolver dlsSolver = new DLSSolver();
-            long dlsStartTime = System.currentTimeMillis();
+            long dlsStartTime = System.nanoTime();
             // For DLS, we set a depth limit based on the number of empty cells
             int emptyCount = countEmptyCells(sudokuBoards.get(i));
-            int depthLimit = emptyCount * 2; // A heuristic for depth limit
-            boolean dlsSolved = dlsSolver.solve(sudokuBoards.get(i), depthLimit, 5); // Find up to 5 solutions
-            long dlsEndTime = System.currentTimeMillis();
+            int depthLimit = 81; // A heuristic for depth limit
+            boolean dlsSolved = dlsSolver.solve(dlSudokuGraph, depthLimit); // Find up to 5 solutions
+            long dlsEndTime = System.nanoTime();
                             
             if (dlsSolved) {
                 System.out.println("DLS found " + dlsSolver.getSolutions().size() + " solution(s) in " + 
-                                    dlsSolver.getSteps() + " steps and " + (dlsEndTime - dlsStartTime) + "ms");
+                                    dlsSolver.getSteps() + " steps and " + (dlsEndTime - dlsStartTime) + "ns");
                 System.out.println("First solution:");
                 printGrid(dlsSolver.getSolutions().get(0));
             } else {
                 System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
             }
+            
+            // Solve using BFS
+            System.out.println("\nSolving with BFS...");
+            SudokuGraph bfsSudokuGraph = new SudokuGraph(sudokuBoards.get(i));
+            BFSSolver bfsSolver = new BFSSolver();
+            long bfsStartTime = System.nanoTime();
+            boolean bfsSolved = bfsSolver.solve(bfsSudokuGraph); // Find up to 5 solutions
+            long bfsEndTime = System.nanoTime();
+                            
+            if (bfsSolved) {
+                System.out.println("BFS found " + bfsSolver.getSolutions().size() + " solution(s) in " + (bfsEndTime - bfsStartTime) + "ms");
+                System.out.println("First solution:");
+                String firstSolution = bfsSolver.getSolutions().iterator().next();
+                //printGrid(bfsSolver.getSolutions());
+                System.out.println(firstSolution);
+            } else {
+                System.out.println("BFS could not solve the puzzle.");
+            }
 
             // Compare the algorithms
             System.out.println("\nComparison:");
-            System.out.println("BFS Steps: " + bfsSolver.getSteps() + ", Time: " + (bfsEndTime - bfsStartTime) + "ms");
-            System.out.println("DLS Steps: " + dlsSolver.getSteps() + ", Time: " + (dlsEndTime - dlsStartTime) + "ms");
+            System.out.println("BFS Time: " + (bfsEndTime - bfsStartTime) + "ns");
+            System.out.println("DLS Time: " + (dlsEndTime - dlsStartTime) + "ns");
 
             if (bfsSolved && dlsSolved) {
-                if (bfsSolver.getSteps() < dlsSolver.getSteps()) {
+                /*if (bfsSolver.getSteps() < dlsSolver.getSteps()) {
                     System.out.println("BFS was more efficient in terms of steps.");
                 } else if (dlsSolver.getSteps() < bfsSolver.getSteps()) {
                     System.out.println("DLS was more efficient in terms of steps.");
                 } else {
                     System.out.println("Both algorithms took the same number of steps.");
-                }
+                }*/
                 
                 if ((bfsEndTime - bfsStartTime) < (dlsEndTime - dlsStartTime)) {
                     System.out.println("BFS was faster in terms of time.");
