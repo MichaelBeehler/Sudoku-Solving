@@ -24,12 +24,17 @@ public class BFSSolver {
         
         Queue<SudokuGraph> queue = new LinkedList<>();
         queue.add(initialGraph);
-        
+
+
+        // Loop while there are graphs left in the queue
         while (!queue.isEmpty()) {
             SudokuGraph currGraph = queue.poll();
-
+            
+            // If the puzzle has been solved
             if (currGraph.isPuzzleSolved()) {
+                // Convert it to a string to check if it has already been found
                 String solvedAsStr = convertToString(currGraph);
+                // If this is a new solution, add it to the Set
                 if (!previousSolutions.contains(solvedAsStr)) {
                     previousSolutions.add(solvedAsStr);
                 }
@@ -37,15 +42,21 @@ public class BFSSolver {
             }
 
             boolean visited = false; 
+            // Loop trough the graph
             for (int currRow = 0; currRow < currGraph.getSize(); currRow ++) {
                 for (int currCol = 0; currCol < currGraph.getSize(); currCol ++) {
+                    // If we have found an empty slot, it needs to be filled
                     if (currGraph.getValue(currRow, currCol) == 0) {
+                        // Find the possible valid values that can be put in the slot
                         List <Integer> validValuesList = currGraph.validValueList(currRow, currCol);
-
+                        
+                        // For every value in the list of possible values
                         for (int validValue : validValuesList) {
+                            // Create a new grid and graph that will store the new data
                             int [][] newGrid = currGraph.copyGrid();
                             newGrid[currRow][currCol] = validValue;
                             SudokuGraph newGraph = new SudokuGraph(newGrid);
+                            // Add this new graph to the queue, so that it can be checked for valid solutions
                             queue.add(newGraph);
 
                         }

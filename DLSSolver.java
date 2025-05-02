@@ -34,10 +34,12 @@ public class DLSSolver {
      */
     private boolean dls(int[][] currentGrid, int maxDepth) {
         
+        // If we have traversed as far as we can, there is no solution
         if (maxDepth == 0) {
             return false;
         }
         
+        // Create a new Graph based on the current state of the grid
         SudokuGraph sudokuGraph = new SudokuGraph(currentGrid);
         
         if (sudokuGraph.isPuzzleSolved()) {
@@ -48,15 +50,20 @@ public class DLSSolver {
         // Do a DLS
         for (int currRow = 0; currRow < currentGrid.length; currRow ++) {
             for (int currCol = 0; currCol < currentGrid[currRow].length; currCol ++) {
+                // If the value in the current grid is a zero, that means we have to find a value to input
                 if (currentGrid [currRow][currCol] == 0) {
+                    // Create a list of all the values that we can put in the slot
                     List <Integer> values = sudokuGraph.validValueList(currRow, currCol);
-
+                    // Put each possible value in the grid
                     for (int possibleValue : values) {
                         currentGrid [currRow][currCol] = possibleValue;
-
+                        
+                        // Run the DLS with the cell that we input, testing if it's a valid solution
                         if (dls(currentGrid, maxDepth - 1)) {
+                            // If the DLS is successful, return true
                             return true;
                         }
+                        // If the search was not successful, set the value ack to zero, and move on
                         currentGrid[currRow][currCol] = 0;
                     }
                     return false;
