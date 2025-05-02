@@ -59,9 +59,8 @@ public class SudokuMain {
             if (bfsSolved) {
                 System.out.println("BFS found " + bfsSolver.getSolutions().size() + " solution(s) in " + (bfsEndTime - bfsStartTime) + "ns");
                 System.out.println("First solution:");
-                String firstSolution = bfsSolver.getSolutions().iterator().next();
-                //printGrid(bfsSolver.getSolutions());
-                System.out.println(firstSolution);
+                //String firstSolution = bfsSolver.getSolutions().get(0);
+                printGrid(bfsSolver.getSolutions().get(0));
             } else {
                 System.out.println("BFS could not solve the puzzle.");
             }
@@ -72,14 +71,7 @@ public class SudokuMain {
             System.out.println("DLS Time: " + (dlsEndTime - dlsStartTime) + "ns");
 
             if (bfsSolved && dlsSolved) {
-                /*if (bfsSolver.getSteps() < dlsSolver.getSteps()) {
-                    System.out.println("BFS was more efficient in terms of steps.");
-                } else if (dlsSolver.getSteps() < bfsSolver.getSteps()) {
-                    System.out.println("DLS was more efficient in terms of steps.");
-                } else {
-                    System.out.println("Both algorithms took the same number of steps.");
-                }*/
-                
+
                 if ((bfsEndTime - bfsStartTime) < (dlsEndTime - dlsStartTime)) {
                     System.out.println("BFS was faster in terms of time.");
                 } else if ((dlsEndTime - dlsStartTime) < (bfsEndTime - bfsStartTime)) {
@@ -91,7 +83,7 @@ public class SudokuMain {
         }
     }
 
-    // Given in
+    // Given input, read a file and return a list of sudoku boards
     private static List<int[][]> readSudokuFile(String fileName) {
         List <int[][]> sudokuBoards = new ArrayList<>();
 
@@ -101,22 +93,26 @@ public class SudokuMain {
             
             // Traverse the file
             while ((line = sudokBufferedReader.readLine()) != null) {
+                // Remove whitespace
                 line = line.trim();
                 int lineLength = line.length();
+                // If the line length is not equal to 9 (the size of a standard board, don't do anything)
                 if (lineLength != 9) {
                     continue;
                 }
-
+                // Initialize a 2D array that will be the board, with proper dimensions
                 int [][] sudokuBoard = new int [lineLength][lineLength];
 
                 int currRow = 0;
 
                 do {
+                    // Read through each character, get it's value, and add it to the board
                     for (int currCol = 0; currCol < lineLength; currCol ++) {
                         sudokuBoard[currRow][currCol] = Character.getNumericValue(line.charAt(currCol));
                     }
                     currRow ++;
                     
+                    // Read the next line
                     if (currRow < 9) {
                         line = sudokBufferedReader.readLine();
                         if (line == null || line.length() != 9) {
@@ -124,7 +120,8 @@ public class SudokuMain {
                         }
                     }
                 } while (currRow < 9);
-
+                
+                // The board has been completed, add it to the list
                 if (currRow == 9) {
                     sudokuBoards.add(sudokuBoard);
                 }
@@ -133,7 +130,7 @@ public class SudokuMain {
         catch (Exception e) {
             System.out.println(e);
         }
-
+        // Return the list of boards
         return sudokuBoards;
 
     }

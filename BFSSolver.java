@@ -11,7 +11,7 @@ public class BFSSolver {
     // We will store solutions in a Hash Set.
     // This is very useful in order to ensure that we are not inserting any duplicate solutions
     private Set<String> previousSolutions = new HashSet<>();
-    
+    private List<int[][]> solutions = new ArrayList<>();
     
     /**
      * Solves the Sudoku puzzle using BFS.
@@ -22,6 +22,7 @@ public class BFSSolver {
     public boolean solve(SudokuGraph initialGraph) {
         previousSolutions.clear();
         
+        // Create a queue that will store our graphs that need to be explored
         Queue<SudokuGraph> queue = new LinkedList<>();
         queue.add(initialGraph);
 
@@ -37,6 +38,7 @@ public class BFSSolver {
                 // If this is a new solution, add it to the Set
                 if (!previousSolutions.contains(solvedAsStr)) {
                     previousSolutions.add(solvedAsStr);
+                    solutions.add(currGraph.copyGrid());
                 }
             
             }
@@ -76,20 +78,24 @@ public class BFSSolver {
     /**
      * Gets the solutions found by BFS.
      */
-    public Set<String> getSolutions() {
-        return previousSolutions;
+    public List<int[][]> getSolutions() {
+        return solutions;
     }
     
+    // Convert the graph to the string in order to check if it is unique
     private String convertToString (SudokuGraph graph) {
+        // Initialize a stringbuilder, which we will use to create our string 
         StringBuilder s = new StringBuilder();
 
         int [][] grid = graph.copyGrid();
 
+        // Append each value in the grid to the end of the string
         for (int[] row : grid) {
             for (int col : row) {
                 s.append(col);
             }
         }
+        // Return the string representation of the board
         return s.toString();
     }
 }
