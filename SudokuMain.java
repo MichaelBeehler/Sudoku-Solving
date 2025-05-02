@@ -10,9 +10,7 @@
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
 ****************************/
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,15 +34,14 @@ public class SudokuMain {
             SudokuGraph dlSudokuGraph = new SudokuGraph(sudokuBoards.get(i));
             DLSSolver dlsSolver = new DLSSolver();
             long dlsStartTime = System.nanoTime();
-            // For DLS, we set a depth limit based on the number of empty cells
-            int emptyCount = countEmptyCells(sudokuBoards.get(i));
-            int depthLimit = 81; // A heuristic for depth limit
+            // For the DLS, Set the depth limit at 81, meaning it can't traverse further
+            int depthLimit = 81;
             boolean dlsSolved = dlsSolver.solve(dlSudokuGraph, depthLimit); // Find up to 5 solutions
             long dlsEndTime = System.nanoTime();
                             
             if (dlsSolved) {
                 System.out.println("DLS found " + dlsSolver.getSolutions().size() + " solution(s) in " + 
-                                    dlsSolver.getSteps() + " steps and " + (dlsEndTime - dlsStartTime) + "ns");
+                                    + (dlsEndTime - dlsStartTime) + "ns");
                 System.out.println("First solution:");
                 printGrid(dlsSolver.getSolutions().get(0));
             } else {
@@ -56,11 +53,11 @@ public class SudokuMain {
             SudokuGraph bfsSudokuGraph = new SudokuGraph(sudokuBoards.get(i));
             BFSSolver bfsSolver = new BFSSolver();
             long bfsStartTime = System.nanoTime();
-            boolean bfsSolved = bfsSolver.solve(bfsSudokuGraph); // Find up to 5 solutions
+            boolean bfsSolved = bfsSolver.solve(bfsSudokuGraph);
             long bfsEndTime = System.nanoTime();
                             
             if (bfsSolved) {
-                System.out.println("BFS found " + bfsSolver.getSolutions().size() + " solution(s) in " + (bfsEndTime - bfsStartTime) + "ms");
+                System.out.println("BFS found " + bfsSolver.getSolutions().size() + " solution(s) in " + (bfsEndTime - bfsStartTime) + "ns");
                 System.out.println("First solution:");
                 String firstSolution = bfsSolver.getSolutions().iterator().next();
                 //printGrid(bfsSolver.getSolutions());
