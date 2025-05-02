@@ -24,6 +24,7 @@ public class DLSSolver {
      * @return true if at least one solution was found
      */
     public boolean solve(SudokuGraph initialGraph, int maxDepth) {
+        solutions.clear();
         boolean searchResult = dls(initialGraph.copyGrid(), maxDepth);
         System.out.println("Number of DLS solutions found: " + solutions.size());
         return !solutions.isEmpty();

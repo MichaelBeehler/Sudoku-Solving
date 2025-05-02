@@ -42,6 +42,8 @@ public class ImprovementMain {
             System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
         }
 
+
+
         // Solve the 16x16 Puzzle
         if (sixteenbysixteen != null) {
             for (int [] row : sixteenbysixteen) {
@@ -51,13 +53,12 @@ public class ImprovementMain {
                 System.out.println();
             }
         }
-        
 
         // Solve using DLS
-        System.out.println("\nSolving with DLS...");
+        System.out.println("\nSolving with Improved DLS...");
         // Create a new graph that will hold the grid
         SudokuGraph dlSudokuGraph = new SudokuGraph(sixteenbysixteen);
-        DLSSolver dlsSolver = new DLSSolver();
+        ImprovementDFS dlsSolver = new ImprovementDFS();
         dlsStartTime = System.nanoTime();
                     
         // Imporvement: change the depth limit to be the amount of cells
@@ -70,6 +71,27 @@ public class ImprovementMain {
                                 + (dlsEndTime - dlsStartTime) + "ns");
             System.out.println("First solution:");
             printGrid(dlsSolver.getSolutions().get(0));
+        } else {
+            System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
+        }
+
+
+        System.out.println("\nSolving with Improved DLS...");
+        // Create a new graph that will hold the grid
+        dlSudokuGraph = new SudokuGraph(sixteenbysixteen);
+        DLSSolver regulardlsSolver = new DLSSolver();
+        dlsStartTime = System.nanoTime();
+                    
+        // Imporvement: change the depth limit to be the amount of cells
+        depthLimit = 256;
+        boolean regulardlsSolved = regulardlsSolver.solve(dlSudokuGraph, depthLimit); // Find up to 5 solutions
+        dlsEndTime = System.nanoTime();
+                                    
+        if (regulardlsSolved) {
+            System.out.println("DLS found " + regulardlsSolver.getSolutions().size() + " solution(s) in " + 
+                                + (dlsEndTime - dlsStartTime) + "ns");
+            System.out.println("First solution:");
+            printGrid(regulardlsSolver.getSolutions().get(0));
         } else {
             System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
         }
