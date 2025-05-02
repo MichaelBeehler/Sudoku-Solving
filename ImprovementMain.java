@@ -1,7 +1,7 @@
 /****************************
  * Program 3 - Sudoku Solving - Improvement
  * Program By: Michael Beehler, Brian Quintero
- * Date Last Edited: May 2nd, 2025
+ * Date Last Edited: May 2nd,2025
  * Description: Solve Sudoku games of varying dimensions and difficulty by using BFS and DFS searches
 
  * CITATION:
@@ -21,75 +21,82 @@ public class ImprovementMain {
         int [][] ninebynine = readImprovedSudokuFiles("9x9.txt", 9);
         int [][] sixteenbysixteen = readImprovedSudokuFiles("16x16.txt", 16);
 
-        // Solve using DLS
+        // Print the initial 16x16 grid
+        System.out.println("Initial 16x16 grid:");
+        printGrid(sixteenbysixteen);
+        System.out.println("Initial empty cells: " + countEmptyCells(sixteenbysixteen));
+        
+        // First, solve with Improved BFS to ensure it's not benefiting from previous solutions
+        System.out.println("\nSolving with Improved BFS...");
+        SudokuGraph bfsSudokuGraph = new SudokuGraph(sixteenbysixteen);
+        ImprovementBFS bfsSolver = new ImprovementBFS();
+        long bfsStartTime = System.nanoTime();
+                    
+        boolean bfsSolved = bfsSolver.solve(bfsSudokuGraph, 5); // Find up to 5 solutions
+        long bfsEndTime = System.nanoTime();
+                                    
+        if (bfsSolved) {
+            System.out.println("Improved BFS found " + bfsSolver.getSolutions().size() + 
+                              " solution(s) in " + (bfsEndTime - bfsStartTime) + "ns");
+            System.out.println("States explored by BFS: " + bfsSolver.getExploredStates());
+            System.out.println("Final empty cells: " + countEmptyCells(bfsSolver.getSolutions().get(0)));
+            System.out.println("First solution:");
+            printGrid(bfsSolver.getSolutions().get(0));
+        } else {
+            System.out.println("Improved BFS could not solve the puzzle");
+        }
+
+        // Now solve the 4x4 puzzle with DLS
         System.out.println("\nSolving with DLS...");
-        // Create a new graph that will hold the grid
         SudokuGraph fourByFourSudokuGraph = new SudokuGraph(fourbyfour);
         DLSSolver fourByFourdlsSolver = new DLSSolver();
         long dlsStartTime = System.nanoTime();
                     
-        // Imporvement: change the depth limit to be the amount of cells
         int depthLimit = 256;
-        boolean fourByFourdlsSolved = fourByFourdlsSolver.solve(fourByFourSudokuGraph, depthLimit); // Find up to 5 solutions
+        boolean fourByFourdlsSolved = fourByFourdlsSolver.solve(fourByFourSudokuGraph, depthLimit);
         long dlsEndTime = System.nanoTime();
                                     
         if (fourByFourdlsSolved) {
-            System.out.println("DLS found " + fourByFourdlsSolver.getSolutions().size() + " solution(s) in " + 
-                                + (dlsEndTime - dlsStartTime) + "ns");
+            System.out.println("DLS found " + fourByFourdlsSolver.getSolutions().size() + 
+                              " solution(s) in " + (dlsEndTime - dlsStartTime) + "ns");
             System.out.println("First solution:");
             printGrid(fourByFourdlsSolver.getSolutions().get(0));
         } else {
             System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
         }
 
-
-
-        // Solve the 16x16 Puzzle
-        if (sixteenbysixteen != null) {
-            for (int [] row : sixteenbysixteen) {
-                for (int col : row) {
-                    System.out.print((col < 10 ? " " : "") + col + " ");
-                }
-                System.out.println();
-            }
-        }
-
-        // Solve using DLS
+        // Solve the 16x16 with Improved DLS
         System.out.println("\nSolving with Improved DLS...");
-        // Create a new graph that will hold the grid
         SudokuGraph dlSudokuGraph = new SudokuGraph(sixteenbysixteen);
         ImprovementDFS dlsSolver = new ImprovementDFS();
         dlsStartTime = System.nanoTime();
                     
-        // Imporvement: change the depth limit to be the amount of cells
         depthLimit = 256;
-        boolean dlsSolved = dlsSolver.solve(dlSudokuGraph, depthLimit); // Find up to 5 solutions
+        boolean dlsSolved = dlsSolver.solve(dlSudokuGraph, depthLimit);
         dlsEndTime = System.nanoTime();
                                     
         if (dlsSolved) {
-            System.out.println("DLS found " + dlsSolver.getSolutions().size() + " solution(s) in " + 
-                                + (dlsEndTime - dlsStartTime) + "ns");
+            System.out.println("DLS found " + dlsSolver.getSolutions().size() + 
+                              " solution(s) in " + (dlsEndTime - dlsStartTime) + "ns");
             System.out.println("First solution:");
             printGrid(dlsSolver.getSolutions().get(0));
         } else {
             System.out.println("DLS could not solve the puzzle with depth limit " + depthLimit);
         }
 
-
+        // Solve with regular DLS for comparison
         System.out.println("\nSolving with Improved DLS...");
-        // Create a new graph that will hold the grid
         dlSudokuGraph = new SudokuGraph(sixteenbysixteen);
         DLSSolver regulardlsSolver = new DLSSolver();
         dlsStartTime = System.nanoTime();
                     
-        // Imporvement: change the depth limit to be the amount of cells
         depthLimit = 256;
-        boolean regulardlsSolved = regulardlsSolver.solve(dlSudokuGraph, depthLimit); // Find up to 5 solutions
+        boolean regulardlsSolved = regulardlsSolver.solve(dlSudokuGraph, depthLimit);
         dlsEndTime = System.nanoTime();
                                     
         if (regulardlsSolved) {
-            System.out.println("DLS found " + regulardlsSolver.getSolutions().size() + " solution(s) in " + 
-                                + (dlsEndTime - dlsStartTime) + "ns");
+            System.out.println("DLS found " + regulardlsSolver.getSolutions().size() + 
+                              " solution(s) in " + (dlsEndTime - dlsStartTime) + "ns");
             System.out.println("First solution:");
             printGrid(regulardlsSolver.getSolutions().get(0));
         } else {
@@ -187,4 +194,13 @@ public class ImprovementMain {
         }
     }
     
+    private static int countEmptyCells(int[][] grid) {
+        int count = 0;
+        for (int[] row : grid) {
+            for (int cell : row) {
+                if (cell == 0) count++;
+            }
+        }
+        return count;
+    }
 }

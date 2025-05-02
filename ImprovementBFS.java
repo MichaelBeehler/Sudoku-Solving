@@ -1,105 +1,165 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.*;;
+import java.util.*;
 
+/**
+ * Improved BFS implementation for solving Sudoku puzzles.
+ * This implementation uses a most-constrained-cell heuristic to improve efficiency.
+ * 
+ * CITATION:
+ * Based on the paper: "Comparison Analysis of Breadth First Search and Depth Limited Search Algorithms in Sudoku Game"
+ * by Lina, Tirsa & Rumetna, Matheus. (2021).
+ * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
+ */
 public class ImprovementBFS {
-    // We will store solutions in a Hash Set.
-    // This is very useful in order to ensure that we are not inserting any duplicate solutions
-    // We use special Concurrent and Synchronized in order to ensure they work well with threads
-    private Set<String> previousSolutions = ConcurrentHashMap.newKeySet();
-    private List<int[][]> solutions = Collections.synchronizedList(new ArrayList<>());
-    
-    /**
-     * Solves the Sudoku puzzle using BFS.
-     * @param initialGrid The initial Sudoku grid
-     * @param maxSolutions Maximum number of solutions to find (0 for all)
-     * @return true if at least one solution was found
-     */
-    public boolean solve(SudokuGraph initialGraph) {
-        previousSolutions.clear();
+    private List<int[][]> solutions;
+    private final int MAX_SOLUTIONS = 5; // Limit number of solutions to find
+    private int exploredStates; // Add this field to track states explored
+
+    public ImprovementBFS() {
+        solutions = new ArrayList<>();
+        exploredStates = 0;
+    }
+
+    public boolean solve(SudokuGraph graph, int maxSolutions) {
         solutions.clear();
-
-        // Create a queue that will store our graphs that need to be explored
-        ConcurrentLinkedQueue<SudokuGraph> queue = new ConcurrentLinkedQueue<>();
-        queue.add(initialGraph);
-
-        ExecutorService sudokuExecutor = Executors.newFixedThreadPool(4);
-
-
-        // Loop while there are graphs left in the queue
-        while (!queue.isEmpty()) {
-            SudokuGraph currGraph = queue.poll();
+        exploredStates = 0; // Reset counter
+        
+        // Use the copyGrid method from SudokuGraph to get a copy of the initial grid
+        int[][] initialGrid = graph.copyGrid();
+        
+        Queue<int[][]> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+        
+        queue.add(initialGrid);
+        visited.add(gridToString(initialGrid));
+        
+        while (!queue.isEmpty() && solutions.size() < maxSolutions) {
+            int[][] currentGrid = queue.poll();
+            exploredStates++; // Increment counter for each state explored
             
-            // If the puzzle has been solved
-            if (currGraph.isPuzzleSolved()) {
-                // Convert it to a string to check if it has already been found
-                String solvedAsStr = convertToString(currGraph);
-                // If this is a new solution, add it to the Set
-                if (!previousSolutions.contains(solvedAsStr)) {
-                    previousSolutions.add(solvedAsStr);
-                    solutions.add(currGraph.copyGrid());
-                }
-            
+            if (isComplete(currentGrid)) {
+                solutions.add(deepCopy(currentGrid));
+                continue;
             }
-
-            boolean visited = false; 
-            // Loop trough the graph
-            for (int currRow = 0; currRow < currGraph.getSize(); currRow ++) {
-                for (int currCol = 0; currCol < currGraph.getSize(); currCol ++) {
-                    // If we have found an empty slot, it needs to be filled
-                    if (currGraph.getValue(currRow, currCol) == 0) {
-                        // Find the possible valid values that can be put in the slot
-                        List <Integer> validValuesList = currGraph.validValueList(currRow, currCol);
-                        
-                        // For every value in the list of possible values
-                        for (int validValue : validValuesList) {
-                            // Create a new grid and graph that will store the new data
-                            int [][] newGrid = currGraph.copyGrid();
-                            newGrid[currRow][currCol] = validValue;
-                            SudokuGraph newGraph = new SudokuGraph(newGrid);
-                            // Add this new graph to the queue, so that it can be checked for valid solutions
-                            queue.add(newGraph);
-
-                        }
-                        visited = true;
-                        break;
-                    } 
+            
+            // Improvement: Find the most constrained cell (cell with fewest valid options)
+            int[] bestCell = findMostConstrainedCell(currentGrid);
+            if (bestCell == null) continue;
+            
+            int row = bestCell[0];
+            int col = bestCell[1];
+            int size = currentGrid.length;
+            
+            // Try each possible value
+            for (int num = 1; num <= size; num++) {
+                if (isValid(currentGrid, row, col, num)) {
+                    int[][] newGrid = deepCopy(currentGrid);
+                    newGrid[row][col] = num;
+                    
+                    String gridStr = gridToString(newGrid);
+                    if (!visited.contains(gridStr)) {
+                        visited.add(gridStr);
+                        queue.add(newGrid);
+                    }
                 }
-                if (visited) {
-                    break;
-                }
-
             }
         }
-        return !previousSolutions.isEmpty();
+        
+        return !solutions.isEmpty();
     }
     
-    /**
-     * Gets the solutions found by BFS.
-     */
+    // Improvement: Find the cell with fewest valid options to reduce branching factor
+    private int[] findMostConstrainedCell(int[][] grid) {
+        int minOptions = Integer.MAX_VALUE;
+        int[] bestCell = null;
+        
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 0) {
+                    int options = countValidOptions(grid, i, j);
+                    if (options < minOptions) {
+                        minOptions = options;
+                        bestCell = new int[]{i, j};
+                        
+                        // Optimization: If we find a cell with only one option, return immediately
+                        if (minOptions == 1) return bestCell;
+                    }
+                }
+            }
+        }
+        return bestCell;
+    }
+    
+    private int countValidOptions(int[][] grid, int row, int col) {
+        int count = 0;
+        int size = grid.length;
+        
+        for (int num = 1; num <= size; num++) {
+            if (isValid(grid, row, col, num)) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    private boolean isComplete(int[][] grid) {
+        for (int[] row : grid) {
+            for (int cell : row) {
+                if (cell == 0) return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean isValid(int[][] grid, int row, int col, int num) {
+        int size = grid.length;
+        int boxSize = (int) Math.sqrt(size);
+        
+        // Check row
+        for (int j = 0; j < size; j++) {
+            if (grid[row][j] == num) return false;
+        }
+        
+        // Check column
+        for (int i = 0; i < size; i++) {
+            if (grid[i][col] == num) return false;
+        }
+        
+        // Check box
+        int boxRowStart = row - row % boxSize;
+        int boxColStart = col - col % boxSize;
+        for (int i = 0; i < boxSize; i++) {
+            for (int j = 0; j < boxSize; j++) {
+                if (grid[boxRowStart + i][boxColStart + j] == num) return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private String gridToString(int[][] grid) {
+        StringBuilder sb = new StringBuilder();
+        for (int[] row : grid) {
+            for (int cell : row) {
+                sb.append(cell);
+            }
+        }
+        return sb.toString();
+    }
+    
+    private int[][] deepCopy(int[][] original) {
+        int[][] copy = new int[original.length][original[0].length];
+        for (int i = 0; i < original.length; i++) {
+            System.arraycopy(original[i], 0, copy[i], 0, original[i].length);
+        }
+        return copy;
+    }
+    
     public List<int[][]> getSolutions() {
         return solutions;
     }
     
-    // Convert the graph to the string in order to check if it is unique
-    private String convertToString (SudokuGraph graph) {
-        // Initialize a stringbuilder, which we will use to create our string 
-        StringBuilder s = new StringBuilder();
-
-        int [][] grid = graph.copyGrid();
-
-        // Append each value in the grid to the end of the string
-        for (int[] row : grid) {
-            for (int col : row) {
-                s.append(col);
-            }
-        }
-        // Return the string representation of the board
-        return s.toString();
+    // Add this method to get the number of states explored
+    public int getExploredStates() {
+        return exploredStates;
     }
 }
