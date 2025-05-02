@@ -1,7 +1,7 @@
 /****************************
  * Program 3 - Sudoku Solving
  * Program By: Michael Beehler, Brian Quintero
- * Date Last Edited: May 1st, 2025
+ * Date Last Edited: May 2nd, 2025
  * Description: Solve Sudoku games of varying difficulty using BFS and DLS
 
  * CITATION:
