@@ -15,10 +15,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ImprovementDFS {
+public class ImprovementDLS {
     private final List<int[][]> solutions;
     
-    public ImprovementDFS() {
+    public ImprovementDLS() {
         this.solutions = Collections.synchronizedList(new ArrayList<>());
     }
     

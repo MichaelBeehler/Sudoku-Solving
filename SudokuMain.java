@@ -8,6 +8,7 @@
  * Based on the paper: "Comparison Analysis of Breadth First Search and Depth Limited Search Algorithms in Sudoku Game"
  * by Lina, Tirsa & Rumetna, Matheus. (2021).
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
+ * Sudoku Puzzles Courtesy of - Sudoku.com (Easy, Medium, Hard), https://puzzling.stackexchange.com/questions/67789/examples-of-sudokus-with-two-solutions (Multiple Solutions)
 ****************************/
 import java.io.BufferedReader;
 import java.io.FileReader;

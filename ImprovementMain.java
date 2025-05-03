@@ -7,7 +7,13 @@
  * CITATION:
  * Based on the paper: "Comparison Analysis of Breadth First Search and Depth Limited Search Algorithms in Sudoku Game"
  * by Lina, Tirsa & Rumetna, Matheus. (2021).
+ * 
+ * Puzzles Take from -
  * https://www.researchgate.net/publication/358642884_Comparison_Analysis_of_Breadth_First_Search_and_Depth_Limited_Search_Algorithms_in_Sudoku_Game
+ * https://1sudoku.com/sudoku-variants/super-sudoku-16x16 (16x16), 
+ * https://puzzling.stackexchange.com/questions/67789/examples-of-sudokus-with-two-solutions (Multiple Solutions),
+ * Sudoku.com (Standard 9x9),
+ * Google Images
 ****************************/
 
 import java.io.BufferedReader;
@@ -39,7 +45,7 @@ public class ImprovementMain {
     // Given an int[][], run the three searches that we are interested in
     private static void runSearches (int[][] grid) {
         ImprovementBFS bfsSolver = new ImprovementBFS();
-        ImprovementDFS improvedDLSSolver = new ImprovementDFS();
+        ImprovementDLS improvedDLSSolver = new ImprovementDLS();
         DLSSolver regDlsSolver = new DLSSolver();
 
         int depthLimit = 256;
@@ -70,7 +76,7 @@ public class ImprovementMain {
         }
 
         // Run the Improved DLS Search
-        System.out.println("\nSolving with Improved DLS (This will take some time)...");
+        System.out.println("\nSolving with Improved DLS (This will take some time, maybe up to a minute for 16x16)...");
         SudokuGraph dlSudokuGraph = new SudokuGraph(grid);
 
         long impdlsStartTime = System.nanoTime();
@@ -86,7 +92,7 @@ public class ImprovementMain {
             System.out.println("Improved DLS could not solve the puzzle with depth limit " + depthLimit);
         }
 
-        System.out.println("\nSolving with Regular DLS...");
+        System.out.println("\nSolving with Regular DLS (This may take around a minute for large Grids)...");
         SudokuGraph regDlsGraph = new SudokuGraph(grid);
 
         long regdlsStartTime = System.nanoTime();

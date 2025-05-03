@@ -43,6 +43,7 @@ public class DLSSolver {
         // Create a new Graph based on the current state of the grid
         SudokuGraph sudokuGraph = new SudokuGraph(currentGrid);
         
+        // If solved, add the current Grid to the solutions
         if (sudokuGraph.isPuzzleSolved()) {
             solutions.add(currentGrid);
             return true;
