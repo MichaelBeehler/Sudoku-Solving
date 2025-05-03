@@ -37,18 +37,29 @@ public class ImprovementDFS {
         // Start the threading process, using one thread per available processor.
         // We will use threading in order to speed up search time, allowing bigger grids to run on our machines
         ExecutorService sudokuExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
+        
+        // This list stores the results of future computations
+        // This is important to have, as we are doing threading
+        // If, after running the search, we can retrieve a value from this ArrayList, that means we've found a solution
         List<Future<Boolean>> futures = new ArrayList<>();
 
+        // We are using a label so that we can jump out of all of these nested loops
+        // We want to do this, as we need to exit from here as soon as we find an empty cell and start running our threads
         outerLoop:
         for (int currRow = 0; currRow < initialGrid.length; currRow ++) {
             for (int currCol = 0; currCol < initialGrid[currRow].length; currCol ++) {
+                // If we have found an empty cell, we can start running the multiple threads
                 if (initialGrid[currRow][currCol] == 0) {
+                    // Get a list of the possible values we can place in the empty cell
                     List<Integer> validValues = initialGraph.validValueList (currRow, currCol);
+                    // For these valid values, create a new branch that will run threads that test that specific "path"
                     for (int validVal : validValues) {
                         int[][] branch = initialGraph.copyGrid();
                         branch [currRow][currCol] = validVal;
 
+                        // CHATGPT helped with the specific threading syntax here
+                        // We are running the dls seach for the branches we created above on different threads, with the
+                        // goal of finding solutions quickly
                         Callable<Boolean> task = () -> dls(branch, maxDepth - 1);
                         futures.add(sudokuExecutor.submit(task));
                     }
@@ -57,10 +68,13 @@ public class ImprovementDFS {
             }
         }
 
+        // Finish executing the, then stop running the thread
         sudokuExecutor.shutdown();
 
+        // hasBeenFound will represent if we have found a solution
         boolean hasBeenFound = false;
 
+        // See if any solution has been found
         for (Future<Boolean> future : futures) {
             try {
                 if (future.get()) {
@@ -72,8 +86,10 @@ public class ImprovementDFS {
             }
         }
 
+        // Stop the running of all threads and tasks, showing that we're finished
         sudokuExecutor.shutdownNow();
         System.out.println("Number of DLS solutions Found: " + solutions.size());
+        // Return true if a solution has been found
         return hasBeenFound;
     }
     
